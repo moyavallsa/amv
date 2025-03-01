@@ -129,7 +129,7 @@ const Contact = () => {
           )}
           
           {formSuccess && (
-            <p className="text-green-500">Thank you! Your message has been sent successfully.</p>
+            <p className="text-green-500">Thank you! Your message has been sent successfully and stored in our database.</p>
           )}
 
           <button
