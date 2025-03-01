@@ -1,6 +1,5 @@
 import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
-import emailjs from "@emailjs/browser";
 
 import { styles } from "../styles";
 import { EarthCanvas } from "./canvas";
@@ -17,6 +16,7 @@ const Contact = () => {
 
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
+  const [formSuccess, setFormSuccess] = useState(false);
 
   const handleChange = (e) => {
     const { target } = e;
@@ -40,48 +40,22 @@ const Contact = () => {
       return;
     }
 
-    // Log the environment variables (will only show in development)
-    console.log("Service ID:", import.meta.env.VITE_APP_EMAILJS_SERVICE_ID);
-    console.log("Template ID:", import.meta.env.VITE_APP_EMAILJS_TEMPLATE_ID);
-    console.log("Public Key:", import.meta.env.VITE_APP_EMAILJS_PUBLIC_KEY ? "Exists" : "Missing");
-
-    // Prepare template parameters
-    const templateParams = {
-      from_name: form.name,
-      to_name: "Antonio Moya Valls",
-      from_email: form.email,
-      to_email: "amoyavalls@gmail.com",
-      message: form.message,
-    };
-
-    // Initialize EmailJS with your public key
-    emailjs.init(import.meta.env.VITE_APP_EMAILJS_PUBLIC_KEY);
-
-    emailjs
-      .send(
-        import.meta.env.VITE_APP_EMAILJS_SERVICE_ID,
-        import.meta.env.VITE_APP_EMAILJS_TEMPLATE_ID,
-        templateParams
-      )
-      .then(
-        (response) => {
-          setLoading(false);
-          console.log("SUCCESS!", response.status, response.text);
-          alert("Thank you. I will get back to you as soon as possible.");
-
-          setForm({
-            name: "",
-            email: "",
-            message: "",
-          });
-        },
-        (error) => {
-          setLoading(false);
-          console.error("FAILED...", error);
-          setFormError(`Failed to send message: ${error.text}`);
-          alert("Something went wrong. Please try again.");
-        }
-      );
+    // The form will be handled by Netlify's form handling
+    // This is just for UX feedback
+    setTimeout(() => {
+      setLoading(false);
+      setFormSuccess(true);
+      setForm({
+        name: "",
+        email: "",
+        message: "",
+      });
+      
+      // Reset success message after 5 seconds
+      setTimeout(() => {
+        setFormSuccess(false);
+      }, 5000);
+    }, 1000);
   };
 
   return (
@@ -97,9 +71,23 @@ const Contact = () => {
 
         <form
           ref={formRef}
+          name="contact"
+          method="POST"
+          data-netlify="true"
           onSubmit={handleSubmit}
           className='mt-12 flex flex-col gap-8'
+          netlify-honeypot="bot-field"
         >
+          {/* Hidden input for Netlify form handling */}
+          <input type="hidden" name="form-name" value="contact" />
+          
+          {/* Hidden honeypot field to prevent spam */}
+          <p className="hidden">
+            <label>
+              Don't fill this out if you're human: <input name="bot-field" />
+            </label>
+          </p>
+
           <label className='flex flex-col'>
             <span className='text-white font-medium mb-4'>Your Name</span>
             <input
@@ -111,6 +99,7 @@ const Contact = () => {
               className='bg-tertiary py-4 px-6 placeholder:text-secondary text-white rounded-lg outline-none border-none font-medium'
             />
           </label>
+          
           <label className='flex flex-col'>
             <span className='text-white font-medium mb-4'>Your email</span>
             <input
@@ -122,6 +111,7 @@ const Contact = () => {
               className='bg-tertiary py-4 px-6 placeholder:text-secondary text-white rounded-lg outline-none border-none font-medium'
             />
           </label>
+          
           <label className='flex flex-col'>
             <span className='text-white font-medium mb-4'>Your Message</span>
             <textarea
@@ -129,13 +119,17 @@ const Contact = () => {
               name='message'
               value={form.message}
               onChange={handleChange}
-              placeholder='What you want to say?'
+              placeholder='What do you want to say?'
               className='bg-tertiary py-4 px-6 placeholder:text-secondary text-white rounded-lg outline-none border-none font-medium'
             />
           </label>
 
           {formError && (
             <p className="text-red-500">{formError}</p>
+          )}
+          
+          {formSuccess && (
+            <p className="text-green-500">Thank you! Your message has been sent successfully.</p>
           )}
 
           <button
