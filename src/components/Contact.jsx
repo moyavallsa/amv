@@ -28,7 +28,7 @@ const Contact = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setFormError("");
@@ -40,11 +40,40 @@ const Contact = () => {
       return;
     }
 
-    // The form will be handled by Netlify's form handling
-    // This is just for UX feedback
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      // First, let Netlify handle the form submission normally
+      const formData = new FormData(formRef.current);
+      fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(formData).toString(),
+      });
+
+      // Then, also send the data directly to our Netlify function
+      const response = await fetch("/.netlify/functions/store-form-data", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          message: form.message,
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to store form data");
+      }
+
+      console.log("Form data stored successfully:", result);
+      
+      // Show success message
       setFormSuccess(true);
+      
+      // Reset form
       setForm({
         name: "",
         email: "",
@@ -55,7 +84,12 @@ const Contact = () => {
       setTimeout(() => {
         setFormSuccess(false);
       }, 5000);
-    }, 1000);
+    } catch (error) {
+      console.error("Error storing form data:", error);
+      setFormError(`Failed to store form data: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
