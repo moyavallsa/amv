@@ -1,6 +1,8 @@
 import { BrowserRouter } from "react-router-dom";
+import React from 'react';
 
 import { About, Contact, Feedbacks, Hero, Navbar, Tech, Works, StarsCanvas } from "./components";
+import SectionDebug from './components/SectionDebug';
 
 const App = () => {
   return (
@@ -19,6 +21,7 @@ const App = () => {
           <StarsCanvas />
         </div>
       </div>
+      <SectionDebug />
     </BrowserRouter>
   );
 }

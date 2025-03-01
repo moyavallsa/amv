@@ -25,16 +25,45 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Debug function to check if sections exist
+  useEffect(() => {
+    // Check if all section elements exist
+    navLinks.forEach(nav => {
+      const element = document.getElementById(nav.id);
+      console.log(`Section "${nav.id}": ${element ? 'Found' : 'Not found'}`);
+    });
+  }, []);
+
   const handleNavLinkClick = (title, id) => {
     setActive(title);
     setToggle(false);
     
-    // Find the element by ID and scroll to it
+    console.log(`Attempting to navigate to section: ${id}`);
+    
+    // Try multiple selector approaches
     const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+    const sectionElement = document.querySelector(`section[id="${id}"]`);
+    const dataElement = document.querySelector(`[data-section-id="${id}"]`);
+    
+    console.log(`getElementById result: ${element ? 'Found' : 'Not found'}`);
+    console.log(`querySelector section result: ${sectionElement ? 'Found' : 'Not found'}`);
+    console.log(`querySelector data-attr result: ${dataElement ? 'Found' : 'Not found'}`);
+    
+    // Try to find the element by any means
+    const targetElement = element || sectionElement || dataElement;
+    
+    if (targetElement) {
+      // Scroll with a slight delay to ensure DOM is ready
+      setTimeout(() => {
+        window.scrollTo({
+          top: targetElement.offsetTop - 100, // Offset for navbar height
+          behavior: 'smooth'
+        });
+      }, 100);
     } else {
-      console.warn(`Element with id "${id}" not found`);
+      // Fallback to hash-based navigation
+      console.warn(`Element with id "${id}" not found, using fallback`);
+      window.location.hash = id;
     }
   };
 
@@ -71,7 +100,8 @@ const Navbar = () => {
               } hover:text-white text-[18px] font-medium cursor-pointer`}
               onClick={() => handleNavLinkClick(nav.title, nav.id)}
             >
-              <a href={`#${nav.id}`}>{nav.title}</a>
+              {/* Use button instead of anchor to prevent default hash behavior */}
+              <button className="text-inherit font-inherit">{nav.title}</button>
             </li>
           ))}
         </ul>
@@ -98,7 +128,8 @@ const Navbar = () => {
                   }`}
                   onClick={() => handleNavLinkClick(nav.title, nav.id)}
                 >
-                  <a href={`#${nav.id}`}>{nav.title}</a>
+                  {/* Use button instead of anchor to prevent default hash behavior */}
+                  <button className="text-inherit font-inherit">{nav.title}</button>
                 </li>
               ))}
             </ul>
