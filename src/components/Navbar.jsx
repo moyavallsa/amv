@@ -25,6 +25,19 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const handleNavLinkClick = (title, id) => {
+    setActive(title);
+    setToggle(false);
+    
+    // Find the element by ID and scroll to it
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      console.warn(`Element with id "${id}" not found`);
+    }
+  };
+
   return (
     <nav
       className={`${
@@ -56,7 +69,7 @@ const Navbar = () => {
               className={`${
                 active === nav.title ? "text-white" : "text-secondary"
               } hover:text-white text-[18px] font-medium cursor-pointer`}
-              onClick={() => setActive(nav.title)}
+              onClick={() => handleNavLinkClick(nav.title, nav.id)}
             >
               <a href={`#${nav.id}`}>{nav.title}</a>
             </li>
@@ -83,10 +96,7 @@ const Navbar = () => {
                   className={`font-poppins font-medium cursor-pointer text-[16px] ${
                     active === nav.title ? "text-white" : "text-secondary"
                   }`}
-                  onClick={() => {
-                    setToggle(!toggle);
-                    setActive(nav.title);
-                  }}
+                  onClick={() => handleNavLinkClick(nav.title, nav.id)}
                 >
                   <a href={`#${nav.id}`}>{nav.title}</a>
                 </li>
