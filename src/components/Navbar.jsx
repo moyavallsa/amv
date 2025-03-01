@@ -34,37 +34,9 @@ const Navbar = () => {
     });
   }, []);
 
-  const handleNavLinkClick = (title, id) => {
-    setActive(title);
+  const handleClick = (nav) => {
+    setActive(nav.title);
     setToggle(false);
-    
-    console.log(`Attempting to navigate to section: ${id}`);
-    
-    // Try multiple selector approaches
-    const element = document.getElementById(id);
-    const sectionElement = document.querySelector(`section[id="${id}"]`);
-    const dataElement = document.querySelector(`[data-section-id="${id}"]`);
-    
-    console.log(`getElementById result: ${element ? 'Found' : 'Not found'}`);
-    console.log(`querySelector section result: ${sectionElement ? 'Found' : 'Not found'}`);
-    console.log(`querySelector data-attr result: ${dataElement ? 'Found' : 'Not found'}`);
-    
-    // Try to find the element by any means
-    const targetElement = element || sectionElement || dataElement;
-    
-    if (targetElement) {
-      // Scroll with a slight delay to ensure DOM is ready
-      setTimeout(() => {
-        window.scrollTo({
-          top: targetElement.offsetTop - 100, // Offset for navbar height
-          behavior: 'smooth'
-        });
-      }, 100);
-    } else {
-      // Fallback to hash-based navigation
-      console.warn(`Element with id "${id}" not found, using fallback`);
-      window.location.hash = id;
-    }
   };
 
   return (
@@ -98,10 +70,9 @@ const Navbar = () => {
               className={`${
                 active === nav.title ? "text-white" : "text-secondary"
               } hover:text-white text-[18px] font-medium cursor-pointer`}
-              onClick={() => handleNavLinkClick(nav.title, nav.id)}
+              onClick={() => handleClick(nav)}
             >
-              {/* Use button instead of anchor to prevent default hash behavior */}
-              <button className="text-inherit font-inherit">{nav.title}</button>
+              <a href={`#${nav.id}`}>{nav.title}</a>
             </li>
           ))}
         </ul>
@@ -126,10 +97,9 @@ const Navbar = () => {
                   className={`font-poppins font-medium cursor-pointer text-[16px] ${
                     active === nav.title ? "text-white" : "text-secondary"
                   }`}
-                  onClick={() => handleNavLinkClick(nav.title, nav.id)}
+                  onClick={() => handleClick(nav)}
                 >
-                  {/* Use button instead of anchor to prevent default hash behavior */}
-                  <button className="text-inherit font-inherit">{nav.title}</button>
+                  <a href={`#${nav.id}`}>{nav.title}</a>
                 </li>
               ))}
             </ul>
