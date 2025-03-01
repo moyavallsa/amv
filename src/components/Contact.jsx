@@ -16,6 +16,7 @@ const Contact = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const handleChange = (e) => {
     const { target } = e;
@@ -30,23 +31,42 @@ const Contact = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
+    setFormError("");
+
+    // Validate form
+    if (!form.name || !form.email || !form.message) {
+      setFormError("Please fill in all fields");
+      setLoading(false);
+      return;
+    }
+
+    // Log the environment variables (will only show in development)
+    console.log("Service ID:", import.meta.env.VITE_APP_EMAILJS_SERVICE_ID);
+    console.log("Template ID:", import.meta.env.VITE_APP_EMAILJS_TEMPLATE_ID);
+    console.log("Public Key:", import.meta.env.VITE_APP_EMAILJS_PUBLIC_KEY ? "Exists" : "Missing");
+
+    // Prepare template parameters
+    const templateParams = {
+      from_name: form.name,
+      to_name: "Antonio Moya Valls",
+      from_email: form.email,
+      to_email: "amoyavalls@gmail.com",
+      message: form.message,
+    };
+
+    // Initialize EmailJS with your public key
+    emailjs.init(import.meta.env.VITE_APP_EMAILJS_PUBLIC_KEY);
 
     emailjs
       .send(
         import.meta.env.VITE_APP_EMAILJS_SERVICE_ID,
         import.meta.env.VITE_APP_EMAILJS_TEMPLATE_ID,
-        {
-          from_name: form.name,
-          to_name: "Antonio Moya",
-          from_email: form.email,
-          to_email: "amoyavalls@gmail.com",
-          message: form.message,
-        },
-        import.meta.env.VITE_APP_EMAILJS_PUBLIC_KEY
+        templateParams
       )
       .then(
-        () => {
+        (response) => {
           setLoading(false);
+          console.log("SUCCESS!", response.status, response.text);
           alert("Thank you. I will get back to you as soon as possible.");
 
           setForm({
@@ -57,9 +77,9 @@ const Contact = () => {
         },
         (error) => {
           setLoading(false);
-          console.error(error);
-
-          alert("Ahh, something went wrong. Please try again.");
+          console.error("FAILED...", error);
+          setFormError(`Failed to send message: ${error.text}`);
+          alert("Something went wrong. Please try again.");
         }
       );
   };
@@ -87,7 +107,7 @@ const Contact = () => {
               name='name'
               value={form.name}
               onChange={handleChange}
-              placeholder="What's your good name?"
+              placeholder="What's your name?"
               className='bg-tertiary py-4 px-6 placeholder:text-secondary text-white rounded-lg outline-none border-none font-medium'
             />
           </label>
@@ -113,6 +133,10 @@ const Contact = () => {
               className='bg-tertiary py-4 px-6 placeholder:text-secondary text-white rounded-lg outline-none border-none font-medium'
             />
           </label>
+
+          {formError && (
+            <p className="text-red-500">{formError}</p>
+          )}
 
           <button
             type='submit'
